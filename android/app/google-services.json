@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "955163893298",
+    "firebase_url": "https://postalhub-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "postalhub",
+    "storage_bucket": "postalhub.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:955163893298:android:7c00a8f4e9d0863d93e62b",
+        "android_client_info": {
+          "package_name": "com.postalhub.admincms"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADnzeTel4C2y0vLkcNrSh-FLjffrCtMCs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:955163893298:android:08d5e79414bb1d2e93e62b",
+        "android_client_info": {
+          "package_name": "com.postalhub.admincms"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADnzeTel4C2y0vLkcNrSh-FLjffrCtMCs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

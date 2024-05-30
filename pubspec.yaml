@@ -1,0 +1,38 @@
+name: postalhub_admin_cms
+description: "Postalhub CMS"
+
+publish_to: 'none' 
+
+version: 24.5.30+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  cupertino_icons: ^1.0.6
+  dynamic_color: ^1.5.4
+  animations: ^2.0.8
+  cloud_firestore: ^4.14.0
+  image_picker: ^1.0.7
+  path: ^1.9.0
+  firebase_core: ^2.31.0
+  firebase_storage: ^11.6.0
+  firebase_database: ^10.5.5
+  flutter_barcode_scanner: ^2.0.0
+  firebase_auth: ^4.20.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+  - assets/images/postalhub_logo.jpg
+  - assets/gif/not_found.gif
+  - assets/gif/search.gif

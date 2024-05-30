@@ -1,0 +1,41 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "postalhub",
+          "appId": "1:955163893298:android:08d5e79414bb1d2e93e62b",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "postalhub",
+          "configurations": {
+            "android": "1:955163893298:android:08d5e79414bb1d2e93e62b",
+            "ios": "1:955163893298:ios:20a5d2728c1d16ba93e62b",
+            "web": "1:955163893298:web:e80488360f874bea93e62b"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "site": "postalhub-cms",
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "storage": {
+    "rules": "storage.rule"
+  }
+}

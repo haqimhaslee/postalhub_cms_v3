@@ -1,0 +1,37 @@
+User
+
+(Staff previlage)
+Email : admin@postalhub.web.app
+Password : admin@6720
+
+Email : utp@postalhub.web.app
+Password : utp@6720
+
+
+
+inv
+-sort
+
+search
+-multi-queries
+
+checkin
+-web_cam_services
+
+checkout
+-web_cam_services
+-remark(receiver)
+
+
+{
+  "hosting": {
+    "site": "postalhub-cms",
+
+    "public": "public",
+    ...
+  }
+}
+
+
+firebase deploy --only hosting:postalhub-cms
+
