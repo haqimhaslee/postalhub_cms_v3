@@ -64,8 +64,8 @@ class MyListItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final trackingID1 = data['trackingId1'] ?? 'No Title';
-    final trackingID2 = data['trackingId2'] ?? '';
+    final trackingID1 = data['trackingId1'];
+    final remarks = data['remarks'] ?? 'No remarks';
     final imageUrl = data['imageUrl'];
     final status = data['status'];
 
@@ -93,28 +93,62 @@ class MyListItemWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Track No 1: $trackingID1'),
-                      Text('Track No 2: $trackingID2'),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 5, 5, 1),
-                        child: Container(
-                          decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
-                              border: Border.all(
-                                color: Theme.of(context).colorScheme.primary,
+                      Text('Remarks: $remarks'),
+                      if (status == 'DELIVERED')
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 5, 5, 1),
+                          child: Column(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                    color:
+                                        const Color.fromARGB(255, 13, 196, 0),
+                                    border: Border.all(),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(10))),
+                                child: Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(5, 1, 5, 1),
+                                    child: Text(
+                                      data['status'],
+                                      style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimary),
+                                    )),
                               ),
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(10))),
-                          child: Padding(
-                              padding: const EdgeInsets.fromLTRB(5, 1, 5, 1),
-                              child: Text(
-                                status,
-                                style: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimary),
-                              )),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 5, 5, 1),
+                          child: Column(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                    color:
+                                        const Color.fromARGB(255, 167, 196, 0),
+                                    border: Border.all(),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(10))),
+                                child: Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(5, 1, 5, 1),
+                                    child: Text(
+                                      data['status'],
+                                      style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimary),
+                                    )),
+                              ),
+                            ],
+                          ),
                         ),
-                      )
                     ],
                   ))
             ],

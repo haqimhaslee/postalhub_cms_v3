@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 class CheckOutParcel extends StatefulWidget {
   const CheckOutParcel({super.key});
@@ -14,12 +15,15 @@ class CheckOutParcel extends StatefulWidget {
 }
 
 final TextEditingController receiverIdTextField = TextEditingController();
+final TextEditingController receiverRemarksTextField = TextEditingController();
 
 class _CheckOutParcelState extends State<CheckOutParcel> {
   File? file;
+  String? webImagePath;
   ImagePicker imagePicker = ImagePicker();
   FirebaseStorage storage = FirebaseStorage.instance;
   final TextEditingController trackingIdController = TextEditingController();
+
   final List<Map<String, dynamic>> parcels = [];
   final List<Map<String, dynamic>> cart = [];
 
@@ -33,11 +37,25 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
     return imageUrl;
   }
 
+  Future<String> uploadWebImage(XFile imageFile) async {
+    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+    Reference reference =
+        storage.ref().child('parcel_receiver_images/$fileName');
+    UploadTask uploadTask = reference.putData(await imageFile.readAsBytes());
+    TaskSnapshot snapshot = await uploadTask.whenComplete(() => null);
+    String imageUrl = await snapshot.ref.getDownloadURL();
+    return imageUrl;
+  }
+
   Future<void> getImage() async {
     final pickedFile = await imagePicker.pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
       setState(() {
-        file = File(pickedFile.path);
+        if (kIsWeb) {
+          webImagePath = pickedFile.path;
+        } else {
+          file = File(pickedFile.path);
+        }
       });
     }
   }
@@ -97,7 +115,8 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
   }
 
   Future<void> updateData() async {
-    if (file == null || receiverIdTextField.text.isEmpty) {
+    if ((file == null && webImagePath == null) ||
+        receiverIdTextField.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please provide a receiver ID and take a photo!'),
@@ -108,8 +127,15 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
     }
 
     try {
-      String imageUrl = await uploadImage(file!);
+      String imageUrl;
+      if (kIsWeb) {
+        imageUrl = await uploadWebImage(XFile(webImagePath!));
+      } else {
+        imageUrl = await uploadImage(file!);
+      }
       String receiverId = receiverIdTextField.text;
+      String recerverRemarks = receiverRemarksTextField.text;
+      DateTime currentTime = DateTime.now();
 
       for (var parcel in cart) {
         String docId = parcel['id'];
@@ -117,9 +143,11 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
             .collection('parcelInventory')
             .doc(docId)
             .update({
-          'status': 'DELIVERED WOI',
+          'status': 'DELIVERED',
           'receiverImageUrl': imageUrl,
           'receiverId': receiverId,
+          'receiverRemarks': recerverRemarks,
+          'timestamp_delivered': currentTime,
         });
       }
 
@@ -133,6 +161,7 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
       setState(() {
         cart.clear();
         file = null;
+        webImagePath = null;
         receiverIdTextField.clear();
       });
     } catch (error) {
@@ -201,7 +230,7 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
                         ),
                         borderRadius:
                             const BorderRadius.all(Radius.circular(10))),
-                    child: file == null
+                    child: webImagePath == null && file == null
                         ? MaterialButton(
                             //height: 5,
                             child: Column(
@@ -227,11 +256,17 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
                           )
                         : MaterialButton(
                             //height: 5,
-                            child: Image.file(
-                              height: 300,
-                              file!,
-                              fit: BoxFit.fill,
-                            ),
+                            child: kIsWeb
+                                ? Image.network(
+                                    webImagePath!,
+                                    height: 300,
+                                    fit: BoxFit.fill,
+                                  )
+                                : Image.file(
+                                    height: 300,
+                                    file!,
+                                    fit: BoxFit.fill,
+                                  ),
                             onPressed: () {
                               getImage();
                             },
@@ -251,6 +286,21 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10)),
                         labelText: 'Receiver ID*'),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  TextField(
+                    controller: receiverRemarksTextField,
+                    style: const TextStyle(fontSize: 12),
+                    decoration: InputDecoration(
+                        //suffixIcon: IconButton(
+                        //  onPressed: () {},
+                        //  icon: const Icon(Icons.barcode_reader),
+                        //),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        labelText: 'Receiver remarks'),
                   ),
                   FilledButton(
                     onPressed: updateData,

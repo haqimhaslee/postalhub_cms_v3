@@ -1,6 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:postalhub_admin_cms/login_services/login_page.dart';
 import 'package:postalhub_admin_cms/login_services/auth.dart';
+
+final FirebaseAuth auth = FirebaseAuth.instance;
 
 class MyProfile extends StatefulWidget {
   const MyProfile({Key? key}) : super(key: key);
@@ -26,14 +29,14 @@ class _MyProfileState extends State<MyProfile> {
 
   @override
   Widget build(BuildContext context) {
+    final User? user = auth.currentUser;
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('My Profile'),
-          // ... other profile content
-
+          Card(elevation: 1, child: Text("Logged in as : ${user}")),
           const SizedBox(height: 20),
           FilledButton(
             onPressed: logout,

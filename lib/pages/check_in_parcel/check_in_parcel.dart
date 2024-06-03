@@ -1,11 +1,12 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 class CheckInParcel extends StatefulWidget {
   const CheckInParcel({super.key});
@@ -22,6 +23,7 @@ final TextEditingController remarks = TextEditingController();
 
 class _CheckInParcelState extends State<CheckInParcel> {
   File? file;
+  String? webImagePath;
   ImagePicker imagePicker = ImagePicker();
   FirebaseStorage storage = FirebaseStorage.instance;
 
@@ -33,6 +35,7 @@ class _CheckInParcelState extends State<CheckInParcel> {
     String trackingid_4 = trackingId4.text;
     String remarks_ = remarks.text;
     String imageUrl = await uploadImage(file!);
+    DateTime currentTime = DateTime.now(); // Get current date and time
 
     // Create a Map to hold data
     Map<String, dynamic> data = {
@@ -44,6 +47,7 @@ class _CheckInParcelState extends State<CheckInParcel> {
       'status': 'ARRIVED-SORTED',
       'warehouse': 'UTP-1',
       'imageUrl': imageUrl, // Add imageUrl to the data map
+      'timestamp_arrived_sorted': currentTime, // Add timestamp to the data map
     };
 
     // Add data to Firestore
@@ -83,8 +87,18 @@ class _CheckInParcelState extends State<CheckInParcel> {
 
   Future<String> uploadImage(File imageFile) async {
     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    Reference reference = storage.ref().child('parcel_images/$fileName');
+    Reference reference =
+        storage.ref().child('parcel_receiver_images/$fileName');
     UploadTask uploadTask = reference.putFile(imageFile);
+    TaskSnapshot snapshot = await uploadTask.whenComplete(() => null);
+    String imageUrl = await snapshot.ref.getDownloadURL();
+    return imageUrl;
+  }
+
+  Future<String> uploadWebImage(XFile imageFile) async {
+    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+    Reference reference = storage.ref().child('parcel_images/$fileName');
+    UploadTask uploadTask = reference.putData(await imageFile.readAsBytes());
     TaskSnapshot snapshot = await uploadTask.whenComplete(() => null);
     String imageUrl = await snapshot.ref.getDownloadURL();
     return imageUrl;
@@ -94,7 +108,11 @@ class _CheckInParcelState extends State<CheckInParcel> {
     final pickedFile = await imagePicker.pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
       setState(() {
-        file = File(pickedFile.path);
+        if (kIsWeb) {
+          webImagePath = pickedFile.path;
+        } else {
+          file = File(pickedFile.path);
+        }
       });
     }
   }
@@ -117,13 +135,13 @@ class _CheckInParcelState extends State<CheckInParcel> {
         children: [
           Container(
             decoration: BoxDecoration(
-              border: Border.all(
-                color: Theme.of(context).colorScheme.secondary,
-              ),
-              borderRadius: const BorderRadius.all(Radius.circular(10)),
-            ),
-            child: file == null
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+                borderRadius: const BorderRadius.all(Radius.circular(10))),
+            child: webImagePath == null && file == null
                 ? MaterialButton(
+                    //height: 5,
                     child: Column(
                       children: [
                         SizedBox(
@@ -145,11 +163,18 @@ class _CheckInParcelState extends State<CheckInParcel> {
                     },
                   )
                 : MaterialButton(
-                    child: Image.file(
-                      height: 300,
-                      file!,
-                      fit: BoxFit.fill,
-                    ),
+                    //height: 5,
+                    child: kIsWeb
+                        ? Image.network(
+                            webImagePath!,
+                            height: 300,
+                            fit: BoxFit.fill,
+                          )
+                        : Image.file(
+                            height: 300,
+                            file!,
+                            fit: BoxFit.fill,
+                          ),
                     onPressed: () {
                       getImage();
                     },
