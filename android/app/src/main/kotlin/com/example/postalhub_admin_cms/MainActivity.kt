@@ -1,4 +1,4 @@
-package com.example.postalhub_admin_cms
+package com.postalhub.admincms
 
 import io.flutter.embedding.android.FlutterActivity
 

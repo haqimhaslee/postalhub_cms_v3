@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:postalhub_admin_cms/login_services/login_page.dart';
-//import 'package:postalhub_admin_cms/login_services/login_page.dart';
-//import 'package:postalhub_admin_cms/src/navigator/navigator_sevices.dart';
 import 'firebase_options.dart';
 import 'package:postalhub_admin_cms/src/postalhub_ui.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
