@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:postalhub_admin_cms/src/navigator/navigator_sevices.dart';
-import 'package:postalhub_admin_cms/login_services/auth.dart';
+import 'package:postalhub_admin_cms/login_services/auth_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,6 +14,21 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if the user is already signed in
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (user != null) {
+        // If the user is signed in, navigate to the main screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => NavigatorServices()),
+        );
+      }
+    });
+  }
 
   @override
   void dispose() {

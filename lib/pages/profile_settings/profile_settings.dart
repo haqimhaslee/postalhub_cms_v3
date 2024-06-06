@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:postalhub_admin_cms/login_services/login_page.dart';
-import 'package:postalhub_admin_cms/login_services/auth.dart';
+import 'package:postalhub_admin_cms/login_services/auth_page.dart';
 
 final FirebaseAuth auth = FirebaseAuth.instance;
 

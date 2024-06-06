@@ -84,18 +84,18 @@ class _NavigatorServicesState extends State<NavigatorServices> {
             ),
             const NavigationDrawerDestination(
               label: Text("Search Parcel"),
-              icon: Icon(Icons.manage_accounts_outlined),
-              selectedIcon: Icon(Icons.manage_accounts_rounded),
+              icon: Icon(Icons.search_outlined),
+              selectedIcon: Icon(Icons.search_rounded),
             ),
             const NavigationDrawerDestination(
               label: Text("Parcel Key-In"),
-              icon: Icon(Icons.dns_outlined),
-              selectedIcon: Icon(Icons.dns_rounded),
+              icon: Icon(Icons.barcode_reader),
+              selectedIcon: Icon(Icons.barcode_reader),
             ),
             const NavigationDrawerDestination(
               label: Text("Parcel Key-Out"),
-              icon: Icon(Icons.dns_outlined),
-              selectedIcon: Icon(Icons.dns_rounded),
+              icon: Icon(Icons.barcode_reader),
+              selectedIcon: Icon(Icons.barcode_reader),
             ),
             const Padding(
               padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
@@ -103,8 +103,8 @@ class _NavigatorServicesState extends State<NavigatorServices> {
             ),
             const NavigationDrawerDestination(
               label: Text("Profile & Setting"),
-              icon: Icon(Icons.output_outlined),
-              selectedIcon: Icon(Icons.output_rounded),
+              icon: Icon(Icons.manage_accounts_outlined),
+              selectedIcon: Icon(Icons.manage_accounts_rounded),
             ),
             const Padding(
               padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
