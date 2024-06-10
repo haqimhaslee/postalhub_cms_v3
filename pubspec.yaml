@@ -27,6 +27,8 @@ dependencies:
   loading_animation_widget: ^1.2.0+4
   visibility_detector: ^0.2.0
   shimmer: ^2.0.0
+  flutter_image_slideshow: ^0.1.6
+  file_picker: ^8.0.3
 
 
 dev_dependencies:
