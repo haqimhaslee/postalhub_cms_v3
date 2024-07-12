@@ -9,7 +9,14 @@ class AuthService {
         password: password,
       );
     } on FirebaseAuthException catch (e) {
-      throw e.message ?? 'Login Failed';
+      switch (e.code) {
+        case 'user-not-found':
+          throw 'No user found for that email.';
+        case 'wrong-password':
+          throw 'Wrong password provided.';
+        default:
+          throw 'Login failed. Please try again.';
+      }
     }
   }
 

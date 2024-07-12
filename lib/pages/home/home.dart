@@ -1,4 +1,8 @@
+// ignore_for_file: deprecated_member_use
+
+import 'package:flutter/foundation.dart'; // Add this import
 import 'package:flutter/material.dart';
+import 'package:postalhub_admin_cms/pages/home/analytics/analytics_parcel.dart';
 import 'package:postalhub_admin_cms/pages/home/carousel_services/carousel_adder.dart';
 import 'package:postalhub_admin_cms/pages/home/carousel_services/carousel_viewer.dart';
 
@@ -17,154 +21,148 @@ class _HomeState extends State<Home> {
         padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
         child: ListView(
           children: [
-            Text("Analytics"),
-            Card(
-              child: Text('Analytics'),
-            ),
+            AnalyticsParcel(),
             SizedBox(
               height: 20,
             ),
             Divider(),
-            SizedBox(
-              height: 10,
-            ),
-            Text("Carousel services"),
-            SizedBox(
-              height: 20,
-            ),
-            Card(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                elevation: 0,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
+            Column(
+              children: [
+                SizedBox(
+                  height: 20,
                 ),
-                child: SizedBox(
-                    width: 200,
-                    child: Column(children: [
-                      ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(15),
-                            topRight: Radius.circular(15),
-                            bottomLeft: Radius.circular(15),
-                            bottomRight: Radius.circular(15),
-                          ),
+                Text(
+                  "Carousel",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                      child: SizedBox(
+                        width: 150,
+                        height: 100,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(15),
                           child: Material(
-                            color: const Color.fromARGB(0, 255, 193, 7),
+                            color: Theme.of(context).colorScheme.surfaceVariant,
                             child: InkWell(
                               onTap: () {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            CarouselViewer()));
+                                            const CarouselViewer()));
                               },
-                              child: const Padding(
-                                padding: EdgeInsets.only(
-                                  top: 15,
-                                  bottom: 15,
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    SizedBox(
-                                      //width: MediaQuery.of(context).size.width - 180,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              SizedBox(
-                                                  child: Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 0),
-                                                      child: Text(
-                                                          "Show Carousel list",
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                          ))))
-                                            ],
-                                          ),
-                                        ],
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Container(
+                                      width: 50,
+                                      height: 50,
+                                      child: Icon(
+                                        Icons.check_circle_rounded,
+                                        size: 35,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSecondaryContainer,
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                  Text(
+                                    "View Carousel List",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ))
-                    ]))),
-            Card(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                elevation: 0,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
-                ),
-                child: SizedBox(
-                    width: 200,
-                    child: Column(children: [
-                      ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(15),
-                            topRight: Radius.circular(15),
-                            bottomLeft: Radius.circular(15),
-                            bottomRight: Radius.circular(15),
                           ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                      child: SizedBox(
+                        width: 150,
+                        height: 100,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(15),
                           child: Material(
-                            color: const Color.fromARGB(0, 255, 193, 7),
+                            color: Theme.of(context).colorScheme.surfaceVariant,
                             child: InkWell(
                               onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => CarouselAdder()));
+                                if (kIsWeb) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          'Opps! Only avaiable on mobile app for now'),
+                                    ),
+                                  );
+                                } else {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const CarouselAdder()));
+                                }
                               },
-                              child: const Padding(
-                                padding: EdgeInsets.only(
-                                  top: 15,
-                                  bottom: 15,
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    SizedBox(
-                                      //width: MediaQuery.of(context).size.width - 180,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              SizedBox(
-                                                  child: Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 0),
-                                                      child: Text(
-                                                          "Add a Carousel",
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                          ))))
-                                            ],
-                                          ),
-                                        ],
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Container(
+                                      width: 50,
+                                      height: 50,
+                                      child: Icon(
+                                        Icons.add,
+                                        size: 35,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSecondaryContainer,
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                  Text(
+                                    "Add a carousel",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ))
-                    ])))
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ],
         ));
   }

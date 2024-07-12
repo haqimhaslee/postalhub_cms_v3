@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 class CarouselAdder extends StatefulWidget {
   const CarouselAdder({super.key});
@@ -23,19 +22,14 @@ class _CarouselAdderState extends State<CarouselAdder> {
   Future<void> _pickImage() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    setState(() async {
-      if (pickedFile != null) {
-        if (kIsWeb) {
-          // For Flutter web, read the bytes directly
-          _imageBytes = await pickedFile.readAsBytes();
-        } else {
-          // For mobile, read the file
-          _imageFile = File(pickedFile.path);
-        }
-      } else {
-        print('No image selected.');
-      }
-    });
+    if (pickedFile != null) {
+      setState(() {
+        // For mobile, read the file
+        _imageFile = File(pickedFile.path);
+      });
+    } else {
+      print('No image selected.');
+    }
   }
 
   Future<void> _uploadData() async {
@@ -53,21 +47,12 @@ class _CarouselAdderState extends State<CarouselAdder> {
     try {
       String imageUrl = '';
 
-      if (kIsWeb) {
-        // Upload image to Firebase Storage for web
-        final storageRef = FirebaseStorage.instance.ref().child(
-            'carouselServices_images/${DateTime.now().millisecondsSinceEpoch}.png');
-        final uploadTask = storageRef.putData(_imageBytes!);
-        final taskSnapshot = await uploadTask;
-        imageUrl = await taskSnapshot.ref.getDownloadURL();
-      } else {
-        // Upload image to Firebase Storage for mobile
-        final storageRef = FirebaseStorage.instance.ref().child(
-            'carouselServices_images/${DateTime.now().millisecondsSinceEpoch}.png');
-        final uploadTask = storageRef.putFile(_imageFile!);
-        final taskSnapshot = await uploadTask;
-        imageUrl = await taskSnapshot.ref.getDownloadURL();
-      }
+      // Upload image to Firebase Storage for mobile
+      final storageRef = FirebaseStorage.instance.ref().child(
+          'carouselServices_images/${DateTime.now().millisecondsSinceEpoch}.png');
+      final uploadTask = storageRef.putFile(_imageFile!);
+      final taskSnapshot = await uploadTask;
+      imageUrl = await taskSnapshot.ref.getDownloadURL();
 
       // Upload data to Firestore
       await FirebaseFirestore.instance.collection('carouselServices').add({
@@ -119,11 +104,9 @@ class _CarouselAdderState extends State<CarouselAdder> {
               decoration: InputDecoration(labelText: 'Title'),
             ),
             SizedBox(height: 10),
-            _imageBytes == null && _imageFile == null
+            _imageFile == null
                 ? Text('No image selected.')
-                : (kIsWeb
-                    ? Image.memory(_imageBytes!)
-                    : Image.file(_imageFile!)),
+                : Image.file(_imageFile!),
             Divider(),
             if (_isUploading)
               Center(child: CircularProgressIndicator())
@@ -138,7 +121,7 @@ class _CarouselAdderState extends State<CarouselAdder> {
                 onPressed: () async {
                   await _uploadData();
                 },
-                child: Text('Upload to Firestore'),
+                child: Text('Upload'),
               ),
             ],
           ],

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Add this import for date formatting
@@ -107,7 +109,9 @@ class _SearchInventoryState extends State<SearchInventory> {
           itemCount: documents.length,
           itemBuilder: (context, index) {
             final data = documents[index].data()!;
+            final documentId = documents[index].id;
             final imageUrl = data['imageUrl'];
+            final ownerId = data['ownerId']?.toString() ?? '';
             final trackingId2 = data['trackingId2']?.toString() ?? '';
             final trackingId3 = data['trackingId3']?.toString() ?? '';
             final trackingId4 = data['trackingId4']?.toString() ?? '';
@@ -129,170 +133,273 @@ class _SearchInventoryState extends State<SearchInventory> {
                 const SizedBox(
                   height: 10,
                 ),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: Image.network(
-                    imageUrl,
-                    width: 300.0,
-                    height: 300.0,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      String errorMessage;
-                      if (error is NetworkImageLoadException) {
-                        errorMessage = 'Network error: $error';
-                      } else {
-                        errorMessage = 'Failed to load image: $error';
-                      }
-                      return Column(
-                        children: [
-                          const Icon(Icons.image_not_supported_outlined),
-                          Text(errorMessage),
-                        ],
-                      );
-                    },
+                Card(
+                  elevation: 0,
+                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Padding(
+                          padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8.0),
+                                child: Image.network(
+                                  imageUrl,
+                                  width: 300.0,
+                                  height: 300.0,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    String errorMessage;
+                                    if (error is NetworkImageLoadException) {
+                                      errorMessage = 'Network error: $error';
+                                    } else {
+                                      errorMessage =
+                                          'Failed to load image: $error';
+                                    }
+                                    return Column(
+                                      children: [
+                                        const Icon(
+                                            Icons.image_not_supported_outlined),
+                                        Text(errorMessage),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          )),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(30, 0, 0, 10),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Tracking ID 1 : ${data['trackingId1']}',
+                            ),
+                            if (trackingId2.isNotEmpty)
+                              Text(
+                                'Tracking ID 2 : $trackingId2',
+                              ),
+                            if (trackingId3.isNotEmpty)
+                              Text(
+                                'Tracking ID 3 : $trackingId3',
+                              ),
+                            if (trackingId4.isNotEmpty)
+                              Text(
+                                'Tracking ID 4 : $trackingId4',
+                              ),
+                            if (ownerId.isNotEmpty)
+                              Text(
+                                'Owner : $ownerId',
+                              ),
+                            if (remarks.isNotEmpty)
+                              Text(
+                                'Remarks/Notes : $remarks',
+                              ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      )
+                    ],
                   ),
                 ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Text(
-                  'Tracking No 1: ${data['trackingId1']}',
-                ),
-                if (trackingId2.isNotEmpty)
-                  Text(
-                    'Tracking No 2: $trackingId2',
-                  ),
-                if (trackingId3.isNotEmpty)
-                  Text(
-                    'Tracking No 3: $trackingId3',
-                  ),
-                if (trackingId4.isNotEmpty)
-                  Text(
-                    'Tracking No 4: $trackingId4',
-                  ),
-                if (remarks.isNotEmpty)
-                  Text(
-                    'Remarks/Notes : $remarks',
-                  ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 1, 20, 1),
                   child: Divider(
                     color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
-                if (status == 'DELIVERED')
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(5, 5, 5, 1),
-                    child: Column(
-                      children: [
-                        const SizedBox(
-                          height: 10,
+                Card(
+                  elevation: 0,
+                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(30, 0, 30, 10),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (status == 'DELIVERED')
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(5, 5, 5, 1),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Text('Status : '),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                              color: const Color.fromARGB(
+                                                  255, 13, 196, 0),
+                                              border: Border.all(),
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                      Radius.circular(10))),
+                                          child: Padding(
+                                              padding:
+                                                  const EdgeInsets.fromLTRB(
+                                                      5, 1, 5, 1),
+                                              child: Text(
+                                                data['status'],
+                                                style: TextStyle(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onPrimary),
+                                              )),
+                                        ),
+                                      ],
+                                    ),
+                                    if (timestampSorted != null)
+                                      Text(
+                                        'Arrived & sorted at: ${DateFormat.yMMMd().add_jm().format(timestampSorted)}',
+                                      ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    if (timestampDelivered != null)
+                                      Text(
+                                        'Delivered at: ${DateFormat.yMMMd().add_jm().format(timestampDelivered)}',
+                                      ),
+                                    Text(
+                                      'Receiver: ${data['receiverId']}',
+                                    ),
+                                    if (receiverRemarks.isNotEmpty)
+                                      Text(
+                                          'Remarks : ${data['receiverRemarks']}'),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          child: Image.network(
+                                            receiverImageUrl,
+                                            width: 300.0,
+                                            height: 300.0,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              String errorMessage;
+                                              if (error
+                                                  is NetworkImageLoadException) {
+                                                errorMessage =
+                                                    'Network error: $error';
+                                              } else {
+                                                errorMessage =
+                                                    'Failed to load image: $error';
+                                              }
+                                              return Column(
+                                                children: [
+                                                  const Icon(Icons
+                                                      .image_not_supported_outlined),
+                                                  Text(errorMessage),
+                                                ],
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(5, 5, 5, 1),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Text('Status : '),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                              color: const Color.fromARGB(
+                                                  255, 167, 196, 0),
+                                              border: Border.all(),
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                      Radius.circular(10))),
+                                          child: Padding(
+                                              padding:
+                                                  const EdgeInsets.fromLTRB(
+                                                      5, 1, 5, 1),
+                                              child: Text(
+                                                data['status'],
+                                                style: TextStyle(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onPrimary),
+                                              )),
+                                        ),
+                                      ],
+                                    ),
+                                    if (timestampSorted != null)
+                                      Text(
+                                        'Arrived & sorted at: ${DateFormat.yMMMd().add_jm().format(timestampSorted)}',
+                                      ),
+                                  ],
+                                ),
+                              ),
+                          ],
                         ),
-                        if (timestampSorted != null)
-                          Text(
-                            'Arrived and sorted at: ${DateFormat.yMMMd().add_jm().format(timestampSorted)}',
-                          ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                              color: const Color.fromARGB(255, 13, 196, 0),
-                              border: Border.all(),
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(10))),
-                          child: Padding(
-                              padding: const EdgeInsets.fromLTRB(5, 1, 5, 1),
-                              child: Text(
-                                data['status'],
-                                style: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimary),
-                              )),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        if (timestampDelivered != null)
-                          Text(
-                            'Delivered at: ${DateFormat.yMMMd().add_jm().format(timestampDelivered)}',
-                          ),
-                        Text(
-                          'Receiver: ${data['receiverId']}',
-                        ),
-                        if (receiverRemarks.isNotEmpty)
-                          Text('Remarks : ${data['receiverRemarks']}'),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Image.network(
-                            receiverImageUrl,
-                            width: 300.0,
-                            height: 300.0,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              String errorMessage;
-                              if (error is NetworkImageLoadException) {
-                                errorMessage = 'Network error: $error';
-                              } else {
-                                errorMessage = 'Failed to load image: $error';
-                              }
-                              return Column(
-                                children: [
-                                  const Icon(
-                                      Icons.image_not_supported_outlined),
-                                  Text(errorMessage),
-                                ],
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                      ],
-                    ),
-                  )
-                else
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(5, 5, 5, 1),
-                    child: Column(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                              color: const Color.fromARGB(255, 167, 196, 0),
-                              border: Border.all(),
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(10))),
-                          child: Padding(
-                              padding: const EdgeInsets.fromLTRB(5, 1, 5, 1),
-                              child: Text(
-                                data['status'],
-                                style: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimary),
-                              )),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        if (timestampSorted != null)
-                          Text(
-                            'Arrived and sorted at: ${DateFormat.yMMMd().add_jm().format(timestampSorted)}',
-                          ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await _deleteParcel(documentId);
+                      setState(() {});
+                    },
+                    child: const Text('Delete'),
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                )
               ],
             );
           },
         );
       },
     );
+  }
+
+  Future<void> _deleteParcel(String documentId) async {
+    await _firestore.collection('parcelInventory').doc(documentId).delete();
   }
 
   Future<List<DocumentSnapshot<Map<String, dynamic>>>> _performSearch(

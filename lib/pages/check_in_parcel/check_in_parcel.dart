@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,10 +17,12 @@ final TextEditingController trackingId1 = TextEditingController();
 final TextEditingController trackingId2 = TextEditingController();
 final TextEditingController trackingId3 = TextEditingController();
 final TextEditingController trackingId4 = TextEditingController();
+final TextEditingController ownerId = TextEditingController();
 final TextEditingController remarks = TextEditingController();
 
 class _CheckInParcelState extends State<CheckInParcel> {
   File? file;
+  XFile? webFile;
   String? webImagePath;
   ImagePicker imagePicker = ImagePicker();
   FirebaseStorage storage = FirebaseStorage.instance;
@@ -33,9 +33,17 @@ class _CheckInParcelState extends State<CheckInParcel> {
     String trackingid_2 = trackingId2.text;
     String trackingid_3 = trackingId3.text;
     String trackingid_4 = trackingId4.text;
+    String owner_id = ownerId.text;
     String remarks_ = remarks.text;
-    String imageUrl = await uploadImage(file!);
-    DateTime currentTime = DateTime.now(); // Get current date and time
+    String imageUrl;
+
+    if (kIsWeb) {
+      imageUrl = await uploadWebImage(webFile!);
+    } else {
+      imageUrl = await uploadImage(file!);
+    }
+
+    DateTime currentTime = DateTime.now();
 
     // Create a Map to hold data
     Map<String, dynamic> data = {
@@ -43,11 +51,12 @@ class _CheckInParcelState extends State<CheckInParcel> {
       'trackingId2': trackingid_2,
       'trackingId3': trackingid_3,
       'trackingId4': trackingid_4,
+      'ownerId': owner_id,
       'remarks': remarks_,
       'status': 'ARRIVED-SORTED',
       'warehouse': 'UTP-1',
-      'imageUrl': imageUrl, // Add imageUrl to the data map
-      'timestamp_arrived_sorted': currentTime, // Add timestamp to the data map
+      'imageUrl': imageUrl,
+      'timestamp_arrived_sorted': currentTime,
     };
 
     // Add data to Firestore
@@ -59,11 +68,14 @@ class _CheckInParcelState extends State<CheckInParcel> {
       trackingId2.text = '';
       trackingId3.text = '';
       trackingId4.text = '';
+      ownerId.text = '';
       remarks.text = '';
 
       // Clear selected image
       setState(() {
         file = null;
+        webFile = null;
+        webImagePath = null;
       });
 
       // Show success Snackbar
@@ -109,6 +121,7 @@ class _CheckInParcelState extends State<CheckInParcel> {
     if (pickedFile != null) {
       setState(() {
         if (kIsWeb) {
+          webFile = pickedFile;
           webImagePath = pickedFile.path;
         } else {
           file = File(pickedFile.path);
@@ -152,7 +165,7 @@ class _CheckInParcelState extends State<CheckInParcel> {
                           Icons.camera,
                           size: 40,
                         ),
-                        const Text("Camera"),
+                        const Text("Camera* (Required)"),
                         const SizedBox(
                           height: 40,
                         ),
@@ -195,7 +208,7 @@ class _CheckInParcelState extends State<CheckInParcel> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              labelText: 'Tracking ID*',
+              labelText: 'Tracking ID* (Required)',
             ),
           ),
           const SizedBox(
@@ -213,7 +226,7 @@ class _CheckInParcelState extends State<CheckInParcel> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              labelText: 'Tracking ID 2 (Additional)',
+              labelText: 'Tracking ID 2 (Optional)',
             ),
           ),
           const SizedBox(
@@ -231,7 +244,7 @@ class _CheckInParcelState extends State<CheckInParcel> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              labelText: 'Tracking ID 3 (Additional)',
+              labelText: 'Tracking ID 3 (Optional)',
             ),
           ),
           const SizedBox(
@@ -249,7 +262,25 @@ class _CheckInParcelState extends State<CheckInParcel> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              labelText: 'Tracking ID 4 (Additional)',
+              labelText: 'Tracking ID 4 (Optional)',
+            ),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          TextField(
+            controller: ownerId,
+            decoration: InputDecoration(
+              suffixIcon: IconButton(
+                onPressed: () {
+                  scanBarcode(ownerId);
+                },
+                icon: const Icon(Icons.barcode_reader),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              labelText: "Staff/Student ID* (Recommeded)",
             ),
           ),
           const SizedBox(
@@ -261,7 +292,7 @@ class _CheckInParcelState extends State<CheckInParcel> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              labelText: 'Remarks',
+              labelText: 'Remarks (Optional)',
             ),
           ),
           const SizedBox(
@@ -269,7 +300,8 @@ class _CheckInParcelState extends State<CheckInParcel> {
           ),
           FilledButton(
             onPressed: () {
-              if (trackingId1.text.isEmpty || file == null) {
+              if (trackingId1.text.isEmpty ||
+                  (file == null && webFile == null)) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Uh-oh 😯. Missing parcel details'),

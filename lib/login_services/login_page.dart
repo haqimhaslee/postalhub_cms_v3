@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:postalhub_admin_cms/src/navigator/navigator_sevices.dart';
 import 'package:postalhub_admin_cms/login_services/auth_page.dart';
 
@@ -43,13 +44,27 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
+      // Check if email exists in Firestore collection
+      final email = emailController.text;
+      final userDoc = await FirebaseFirestore.instance
+          .collection('admin_user')
+          .where('email', isEqualTo: email)
+          .get();
+
+      if (userDoc.docs.isEmpty) {
+        // Email does not exist in Firestore collection
+        throw Exception('Account not found in our admin database.');
+      }
+
       await AuthService.login(
-        email: emailController.text,
+        email: email,
         password: passwordController.text,
       );
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Login Successful')),
       );
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => NavigatorServices()),

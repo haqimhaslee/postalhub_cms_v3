@@ -244,7 +244,7 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
                                   Icons.camera,
                                   size: 40,
                                 ),
-                                const Text("Camera"),
+                                const Text("Camera* (Required)"),
                                 const SizedBox(
                                   height: 40,
                                 ),
@@ -288,7 +288,7 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
                         labelText: 'Receiver ID*'),
                   ),
                   const SizedBox(
-                    height: 5,
+                    height: 15,
                   ),
                   TextField(
                     controller: receiverRemarksTextField,

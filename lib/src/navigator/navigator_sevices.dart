@@ -4,6 +4,7 @@ import 'package:animations/animations.dart';
 import 'package:postalhub_admin_cms/pages/check_in_parcel/check_in_parcel.dart';
 import 'package:postalhub_admin_cms/pages/check_out_parcel/check_out_parcel.dart';
 import 'package:postalhub_admin_cms/pages/home/home.dart';
+import 'package:postalhub_admin_cms/pages/out_for_delivery/out_for_delivery.dart';
 import 'package:postalhub_admin_cms/pages/parcel_inventory/parcel_inventory.dart';
 import 'package:postalhub_admin_cms/pages/profile_settings/profile_settings.dart';
 import 'package:postalhub_admin_cms/pages/search_inventory/search_inventory.dart';
@@ -23,6 +24,7 @@ class _NavigatorServicesState extends State<NavigatorServices> {
     const SearchInventory(),
     const CheckInParcel(),
     const CheckOutParcel(),
+    const OutForDelivery(),
     const MyProfile(),
   ];
   void openDrawer() {
@@ -87,6 +89,10 @@ class _NavigatorServicesState extends State<NavigatorServices> {
               icon: Icon(Icons.search_outlined),
               selectedIcon: Icon(Icons.search_rounded),
             ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
+              child: Divider(),
+            ),
             const NavigationDrawerDestination(
               label: Text("Parcel Key-In"),
               icon: Icon(Icons.barcode_reader),
@@ -96,6 +102,15 @@ class _NavigatorServicesState extends State<NavigatorServices> {
               label: Text("Parcel Key-Out"),
               icon: Icon(Icons.barcode_reader),
               selectedIcon: Icon(Icons.barcode_reader),
+            ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
+              child: Divider(),
+            ),
+            const NavigationDrawerDestination(
+              label: Text("Delivery"),
+              icon: Icon(Icons.delivery_dining_outlined),
+              selectedIcon: Icon(Icons.delivery_dining),
             ),
             const Padding(
               padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
@@ -149,6 +164,10 @@ class _NavigatorServicesState extends State<NavigatorServices> {
                           icon: Icon(Icons.search_outlined),
                           selectedIcon: Icon(Icons.search_rounded),
                         ),
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
+                          child: Divider(),
+                        ),
                         const NavigationDrawerDestination(
                           label: Text("Parcel Key-In"),
                           icon: Icon(Icons.barcode_reader),
@@ -158,6 +177,15 @@ class _NavigatorServicesState extends State<NavigatorServices> {
                           label: Text("Parcel Key-Out"),
                           icon: Icon(Icons.barcode_reader),
                           selectedIcon: Icon(Icons.barcode_reader),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
+                          child: Divider(),
+                        ),
+                        const NavigationDrawerDestination(
+                          label: Text("Delivery"),
+                          icon: Icon(Icons.delivery_dining_outlined),
+                          selectedIcon: Icon(Icons.delivery_dining),
                         ),
                         const Padding(
                           padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
@@ -209,103 +237,5 @@ class _NavigatorServicesState extends State<NavigatorServices> {
             ),
           ],
         ));
-  }
-}
-
-class NavigationDrawerElement extends StatefulWidget {
-  const NavigationDrawerElement({super.key});
-  @override
-  State<NavigationDrawerElement> createState() =>
-      _NavigationDrawerElementState();
-}
-
-class _NavigationDrawerElementState extends State<NavigationDrawerElement> {
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  var _selectedIndex = 0;
-  // ignore: unused_field
-  final List<Widget> _windgetOption = <Widget>[
-    const Home(),
-    const ParcelInventory(),
-    const SearchInventory(),
-    const CheckInParcel(),
-    const CheckOutParcel(),
-    const MyProfile(),
-  ];
-  void openDrawer() {
-    scaffoldKey.currentState!.openDrawer();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return NavigationDrawer(
-      surfaceTintColor: Theme.of(context).colorScheme.surface,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shadowColor: Theme.of(context).colorScheme.surface,
-      onDestinationSelected: (i) => setState(() => _selectedIndex = i),
-      selectedIndex: _selectedIndex,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.fromLTRB(28, 0, 16, 10),
-          child: Text(
-            ' ',
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-        ),
-        const NavigationDrawerDestination(
-          label: Text("Home"),
-          icon: Icon(Icons.hub_outlined),
-          selectedIcon: Icon(Icons.hub_rounded),
-        ),
-        const NavigationDrawerDestination(
-          label: Text("Parcel Inventory"),
-          icon: Icon(Icons.info_outline_rounded),
-          selectedIcon: Icon(Icons.info_rounded),
-        ),
-        const NavigationDrawerDestination(
-          label: Text("Hub Management"),
-          icon: Icon(Icons.info_outline_rounded),
-          selectedIcon: Icon(Icons.info_rounded),
-        ),
-        const NavigationDrawerDestination(
-          label: Text("Profile & Settings"),
-          icon: Icon(Icons.info_outline_rounded),
-          selectedIcon: Icon(Icons.info_rounded),
-        ),
-        const Padding(
-          padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
-          child: Divider(),
-        ),
-        SizedBox.fromSize(
-          size: const Size(10, 55),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.all(
-              Radius.circular(30),
-            ),
-            child: Material(
-              color: const Color.fromARGB(0, 255, 193, 7),
-              child: InkWell(
-                onTap: () => showLicensePage(
-                  context: context,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      "Licenses",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                        color:
-                            Theme.of(context).colorScheme.onSecondaryContainer,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }

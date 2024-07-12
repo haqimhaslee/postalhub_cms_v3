@@ -1,7 +1,9 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:postalhub_admin_cms/login_services/login_page.dart';
 import 'package:postalhub_admin_cms/login_services/auth_page.dart';
+import 'package:postalhub_admin_cms/login_services/login_page.dart';
 
 final FirebaseAuth auth = FirebaseAuth.instance;
 
@@ -14,15 +16,25 @@ class MyProfile extends StatefulWidget {
 
 class _MyProfileState extends State<MyProfile> {
   Future<void> logout() async {
+    setState(() {});
+
     try {
+      // Check if email exists in Firestore collection
+
       await AuthService.logout();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Logged out')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.toString())),
+      );
+    } finally {
+      setState(() {});
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
       );
     }
   }
@@ -47,14 +59,14 @@ class _MyProfileState extends State<MyProfile> {
                             bottom: 7.5,
                           ),
                           child: Card(
-                            elevation: 1,
+                            elevation: 0,
                             child: Container(
                                 decoration: BoxDecoration(
                                   color: Theme.of(context)
                                       .colorScheme
                                       .secondaryContainer,
                                   borderRadius: const BorderRadius.all(
-                                      Radius.circular(13)),
+                                      Radius.circular(12)),
                                 ),
                                 child: Align(
                                   alignment: Alignment.center,
@@ -69,11 +81,6 @@ class _MyProfileState extends State<MyProfile> {
                                         children: [
                                           Row(
                                             children: [
-                                              const CircleAvatar(
-                                                radius: 40,
-                                                backgroundColor: Color.fromARGB(
-                                                    255, 255, 255, 255),
-                                              ),
                                               Padding(
                                                   padding:
                                                       const EdgeInsets.only(
@@ -91,30 +98,42 @@ class _MyProfileState extends State<MyProfile> {
                                                             .start,
                                                     children: [
                                                       Text(
-                                                        "Admin",
-                                                        style: TextStyle(
-                                                            fontSize: 19,
-                                                            color: Theme.of(
-                                                                    context)
-                                                                .colorScheme
-                                                                .onSecondaryContainer,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w800),
-                                                      ),
-                                                      Text(
-                                                        "Email",
+                                                        "Logged in as:-",
                                                         textAlign:
                                                             TextAlign.center,
                                                         style: TextStyle(
                                                           fontWeight:
-                                                              FontWeight.w200,
+                                                              FontWeight.w400,
                                                           fontSize: 14,
                                                           color: Theme.of(
                                                                   context)
                                                               .colorScheme
                                                               .onSecondaryContainer,
                                                         ),
+                                                      ),
+                                                      Text(
+                                                        "Email : ",
+                                                        style: TextStyle(
+                                                            fontSize: 17,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .colorScheme
+                                                                .onSecondaryContainer,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w600),
+                                                      ),
+                                                      Text(
+                                                        "Branch : ",
+                                                        style: TextStyle(
+                                                            fontSize: 17,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .colorScheme
+                                                                .onSecondaryContainer,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w600),
                                                       ),
                                                     ],
                                                   ))
@@ -126,7 +145,7 @@ class _MyProfileState extends State<MyProfile> {
                           )),
                       const Padding(
                           padding: EdgeInsets.only(
-                            top: 25,
+                            top: 10,
                             bottom: 5,
                           ),
                           child: Text(
@@ -156,10 +175,10 @@ class _MyProfileState extends State<MyProfile> {
                                       topRight: Radius.circular(15),
                                     ),
                                     child: Material(
-                                      color:
-                                          const Color.fromARGB(0, 255, 193, 7),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceVariant,
                                       child: InkWell(
-                                        //splashColor:Color.fromARGB(255, 191, 217, 255),
                                         onTap: () {},
                                         child: Column(
                                           mainAxisAlignment:
@@ -184,12 +203,15 @@ class _MyProfileState extends State<MyProfile> {
                                 SizedBox.fromSize(
                                   size: const Size(400, 55),
                                   child: ClipRRect(
-                                    borderRadius: const BorderRadius.only(),
+                                    borderRadius: const BorderRadius.only(
+                                      bottomRight: Radius.circular(15),
+                                      bottomLeft: Radius.circular(15),
+                                    ),
                                     child: Material(
-                                      color:
-                                          const Color.fromARGB(0, 255, 193, 7),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceVariant,
                                       child: InkWell(
-                                        //splashColor:Color.fromARGB(255, 191, 217, 255),
                                         onTap: () {},
                                         child: Column(
                                           mainAxisAlignment:
@@ -211,43 +233,10 @@ class _MyProfileState extends State<MyProfile> {
                                     ),
                                   ),
                                 ),
-                                SizedBox.fromSize(
-                                  size: const Size(400, 55),
-                                  child: ClipRRect(
-                                    borderRadius: const BorderRadius.only(
-                                      bottomRight: Radius.circular(15),
-                                      bottomLeft: Radius.circular(15),
-                                    ),
-                                    child: Material(
-                                      color:
-                                          const Color.fromARGB(0, 255, 193, 7),
-                                      child: InkWell(
-                                        //splashColor:Color.fromARGB(255, 191, 217, 255),
-                                        onTap: () {},
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: <Widget>[
-                                            Text(
-                                              "-",
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.w500,
-                                                fontSize: 12,
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSecondaryContainer,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
                               ]))),
                       const Padding(
                           padding: EdgeInsets.only(
-                            top: 15,
+                            top: 5,
                             bottom: 5,
                           ),
                           child: Text(
@@ -278,10 +267,10 @@ class _MyProfileState extends State<MyProfile> {
                                       topLeft: Radius.circular(15),
                                     ),
                                     child: Material(
-                                      color:
-                                          const Color.fromARGB(0, 255, 193, 7),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceVariant,
                                       child: InkWell(
-                                        //splashColor:Color.fromARGB(255, 191, 217, 255),
                                         onTap: () {},
                                         child: Column(
                                           mainAxisAlignment:
@@ -307,10 +296,10 @@ class _MyProfileState extends State<MyProfile> {
                                   size: const Size(400, 55),
                                   child: ClipRRect(
                                     child: Material(
-                                      color:
-                                          const Color.fromARGB(0, 255, 193, 7),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceVariant,
                                       child: InkWell(
-                                        //splashColor:Color.fromARGB(255, 191, 217, 255),
                                         onTap: () {},
                                         child: Column(
                                           mainAxisAlignment:
@@ -336,10 +325,10 @@ class _MyProfileState extends State<MyProfile> {
                                   size: const Size(400, 55),
                                   child: ClipRRect(
                                     child: Material(
-                                      color:
-                                          const Color.fromARGB(0, 255, 193, 7),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceVariant,
                                       child: InkWell(
-                                        //splashColor:Color.fromARGB(255, 191, 217, 255),
                                         onTap: () => showLicensePage(
                                           context: context,
                                         ),
@@ -367,10 +356,10 @@ class _MyProfileState extends State<MyProfile> {
                                   size: const Size(400, 55),
                                   child: ClipRRect(
                                     child: Material(
-                                      color:
-                                          const Color.fromARGB(0, 255, 193, 7),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceVariant,
                                       child: InkWell(
-                                        //splashColor:Color.fromARGB(255, 191, 217, 255),
                                         onTap: () {},
                                         child: Column(
                                           mainAxisAlignment:
@@ -400,17 +389,17 @@ class _MyProfileState extends State<MyProfile> {
                                       bottomLeft: Radius.circular(15),
                                     ),
                                     child: Material(
-                                      color:
-                                          const Color.fromARGB(0, 255, 193, 7),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceVariant,
                                       child: InkWell(
-                                        //splashColor:Color.fromARGB(255, 191, 217, 255),
                                         onTap: () {},
                                         child: Column(
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
                                           children: <Widget>[
                                             Text(
-                                              "Project Timeline",
+                                              "Update Info",
                                               style: TextStyle(
                                                 fontWeight: FontWeight.w500,
                                                 fontSize: 12,
@@ -455,7 +444,7 @@ class _MyProfileState extends State<MyProfile> {
                                   color: const Color.fromARGB(0, 255, 193, 7),
                                   child: InkWell(
                                     //splashColor:Color.fromARGB(255, 191, 217, 255),
-                                    onTap: () {},
+                                    onTap: logout,
                                     child: Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,

@@ -70,12 +70,18 @@ class _CarouselViewerState extends State<CarouselViewer> {
               final imageUrl = item['image_url'] ?? '';
 
               return ListTile(
+                onTap: () {},
                 leading: imageUrl.isNotEmpty
                     ? Image.network(imageUrl,
-                        width: 50, height: 50, fit: BoxFit.cover)
+                        width: 80, height: 80, fit: BoxFit.cover)
                     : Icon(Icons.image_not_supported),
-                title: Text(title),
+                title: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title),
+                    ]),
                 trailing: IconButton(
+                  tooltip: 'Delete',
                   icon: Icon(Icons.delete),
                   onPressed: () => _deleteItem(item),
                 ),
