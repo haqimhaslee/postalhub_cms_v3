@@ -57,11 +57,20 @@ class _HomeState extends State<Home> {
                             color: Theme.of(context).colorScheme.surfaceVariant,
                             child: InkWell(
                               onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const CarouselViewer()));
+                                if (kIsWeb) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          'Opps! Only avaiable on mobile app for now'),
+                                    ),
+                                  );
+                                } else {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const CarouselViewer()));
+                                }
                               },
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,

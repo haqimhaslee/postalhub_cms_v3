@@ -2,9 +2,10 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:barcode_scan2/barcode_scan2.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class CheckInParcel extends StatefulWidget {
   const CheckInParcel({super.key});
@@ -27,7 +28,15 @@ class _CheckInParcelState extends State<CheckInParcel> {
   ImagePicker imagePicker = ImagePicker();
   FirebaseStorage storage = FirebaseStorage.instance;
 
+  int parcelCategory = 1; // Default parcel category
+
+  // ignore: unused_field
+  bool _isLoading = false; // Add loading state variable
+
   Future<void> addToFirebase(BuildContext context) async {
+    setState(() {
+      _isLoading = true;
+    });
     // Get values from text fields
     String trackingid_1 = trackingId1.text;
     String trackingid_2 = trackingId2.text;
@@ -53,10 +62,11 @@ class _CheckInParcelState extends State<CheckInParcel> {
       'trackingId4': trackingid_4,
       'ownerId': owner_id,
       'remarks': remarks_,
-      'status': 'ARRIVED-SORTED',
+      'status': 1,
       'warehouse': 'UTP-1',
       'imageUrl': imageUrl,
       'timestamp_arrived_sorted': currentTime,
+      'parcelCategory': parcelCategory, // Add parcel category to data
     };
 
     // Add data to Firestore
@@ -71,11 +81,13 @@ class _CheckInParcelState extends State<CheckInParcel> {
       ownerId.text = '';
       remarks.text = '';
 
-      // Clear selected image
+      // Clear selected image and reset parcel category
       setState(() {
         file = null;
         webFile = null;
         webImagePath = null;
+        parcelCategory = 1; // Reset to default category
+        _isLoading = false;
       });
 
       // Show success Snackbar
@@ -99,8 +111,7 @@ class _CheckInParcelState extends State<CheckInParcel> {
 
   Future<String> uploadImage(File imageFile) async {
     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    Reference reference =
-        storage.ref().child('parcel_receiver_images/$fileName');
+    Reference reference = storage.ref().child('parcel_images/$fileName');
     UploadTask uploadTask = reference.putFile(imageFile);
     TaskSnapshot snapshot = await uploadTask.whenComplete(() => null);
     String imageUrl = await snapshot.ref.getDownloadURL();
@@ -117,27 +128,55 @@ class _CheckInParcelState extends State<CheckInParcel> {
   }
 
   Future<void> getImage() async {
-    final pickedFile = await imagePicker.pickImage(source: ImageSource.camera);
-    if (pickedFile != null) {
-      setState(() {
-        if (kIsWeb) {
-          webFile = pickedFile;
-          webImagePath = pickedFile.path;
-        } else {
-          file = File(pickedFile.path);
+    if (!kIsWeb) {
+      // Check if not running on web
+      var status = await Permission.camera.status;
+      if (status.isDenied) {
+        // Request camera permission if denied
+        status = await Permission.camera.request();
+        if (status.isDenied) {
+          // Handle permission denied (e.g., show a message)
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Camera permission is required.'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          return; // Exit if permission is still denied
         }
-      });
+      }
+    }
+
+    try {
+      final pickedFile =
+          await imagePicker.pickImage(source: ImageSource.camera);
+      if (pickedFile != null) {
+        setState(() {
+          if (kIsWeb) {
+            webFile = pickedFile;
+            webImagePath = pickedFile.path;
+          } else {
+            file = File(pickedFile.path);
+          }
+        });
+      }
+    } catch (e) {
+      // Handle any errors that might occur during image capture
+      print("Error capturing image: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('An error occurred while capturing the image.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 
-  Future<void> scanBarcode(TextEditingController controller) async {
-    String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-        '#ff6666', 'Cancel', true, ScanMode.BARCODE);
-    if (barcodeScanRes != '-1') {
-      setState(() {
-        controller.text = barcodeScanRes;
-      });
-    }
+  Future<void> scanQRCode(TextEditingController controller) async {
+    var result = await BarcodeScanner.scan();
+    setState(() {
+      controller.text = result.rawContent;
+    });
   }
 
   @override
@@ -154,7 +193,6 @@ class _CheckInParcelState extends State<CheckInParcel> {
                 borderRadius: const BorderRadius.all(Radius.circular(10))),
             child: webImagePath == null && file == null
                 ? MaterialButton(
-                    //height: 5,
                     child: Column(
                       children: [
                         SizedBox(
@@ -176,7 +214,6 @@ class _CheckInParcelState extends State<CheckInParcel> {
                     },
                   )
                 : MaterialButton(
-                    //height: 5,
                     child: kIsWeb
                         ? Image.network(
                             webImagePath!,
@@ -201,7 +238,7 @@ class _CheckInParcelState extends State<CheckInParcel> {
             decoration: InputDecoration(
               suffixIcon: IconButton(
                 onPressed: () {
-                  scanBarcode(trackingId1);
+                  scanQRCode(trackingId1);
                 },
                 icon: const Icon(Icons.barcode_reader),
               ),
@@ -219,7 +256,7 @@ class _CheckInParcelState extends State<CheckInParcel> {
             decoration: InputDecoration(
               suffixIcon: IconButton(
                 onPressed: () {
-                  scanBarcode(trackingId2);
+                  scanQRCode(trackingId2);
                 },
                 icon: const Icon(Icons.barcode_reader),
               ),
@@ -237,7 +274,7 @@ class _CheckInParcelState extends State<CheckInParcel> {
             decoration: InputDecoration(
               suffixIcon: IconButton(
                 onPressed: () {
-                  scanBarcode(trackingId3);
+                  scanQRCode(trackingId3);
                 },
                 icon: const Icon(Icons.barcode_reader),
               ),
@@ -255,7 +292,7 @@ class _CheckInParcelState extends State<CheckInParcel> {
             decoration: InputDecoration(
               suffixIcon: IconButton(
                 onPressed: () {
-                  scanBarcode(trackingId4);
+                  scanQRCode(trackingId4);
                 },
                 icon: const Icon(Icons.barcode_reader),
               ),
@@ -266,21 +303,61 @@ class _CheckInParcelState extends State<CheckInParcel> {
             ),
           ),
           const SizedBox(
-            height: 10,
+            height: 15,
+          ),
+          Column(
+            children: [
+              const Text("Parcel Category"),
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Radio<int>(
+                  value: 1,
+                  groupValue: parcelCategory,
+                  onChanged: (value) {
+                    setState(() {
+                      parcelCategory = value!;
+                    });
+                  },
+                ),
+                const Text("Normal"),
+                Radio<int>(
+                  value: 2,
+                  groupValue: parcelCategory,
+                  onChanged: (value) {
+                    setState(() {
+                      parcelCategory = value!;
+                    });
+                  },
+                ),
+                const Text("Self-Collect"),
+                Radio<int>(
+                  value: 3,
+                  groupValue: parcelCategory,
+                  onChanged: (value) {
+                    setState(() {
+                      parcelCategory = value!;
+                    });
+                  },
+                ),
+                const Text("COD"),
+              ]),
+            ],
+          ),
+          const SizedBox(
+            height: 15,
           ),
           TextField(
             controller: ownerId,
             decoration: InputDecoration(
               suffixIcon: IconButton(
                 onPressed: () {
-                  scanBarcode(ownerId);
+                  scanQRCode(ownerId);
                 },
                 icon: const Icon(Icons.barcode_reader),
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              labelText: "Staff/Student ID* (Recommeded)",
+              labelText: "User Unique ID (UID)* (Recommeded)",
             ),
           ),
           const SizedBox(
@@ -299,23 +376,25 @@ class _CheckInParcelState extends State<CheckInParcel> {
             height: 10,
           ),
           FilledButton(
-            onPressed: () {
-              if (trackingId1.text.isEmpty ||
-                  (file == null && webFile == null)) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Uh-oh 😯. Missing parcel details'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              } else {
-                addToFirebase(context);
-              }
-            },
-            child: const Center(
-              child: Text(
-                "Add parcel",
-              ),
+            onPressed: _isLoading // Disable button while loading
+                ? null
+                : () {
+                    if (trackingId1.text.isEmpty ||
+                        (file == null && webFile == null)) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Uh-oh 😯. Missing parcel details'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    } else {
+                      addToFirebase(context);
+                    }
+                  },
+            child: Center(
+              child: _isLoading // Conditionally render button or loading icon
+                  ? const CircularProgressIndicator() // Show loading icon
+                  : const Text("Add parcel"), // Show button text
             ),
           ),
         ],

@@ -22,3 +22,34 @@ Available Status
 
 firebase deploy --only hosting:postalhub-cms
 
+
+
+Parcel Status truth table
+1. 
+ARRIVED    = 1
+DELIVERY   = 0
+DELIVERED  = 0
+
+2. 
+ARRIVED    = 1
+DELIVERY   = 1
+DELIVERED  = 0
+
+3. 
+ARRIVED    = 1
+DELIVERY   = 1
+DELIVERED  = 1
+
+4. (Not in use)
+ARRIVED    = 1
+DELIVERY   = 0
+DELIVERED  = 1
+
+
+
+
+Parcel Category truth table
+1. Normal
+2. Self-Collect
+3. COD
+

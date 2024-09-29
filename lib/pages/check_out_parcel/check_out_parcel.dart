@@ -1,11 +1,10 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:barcode_scan2/barcode_scan2.dart';
 
 class CheckOutParcel extends StatefulWidget {
   const CheckOutParcel({super.key});
@@ -15,7 +14,6 @@ class CheckOutParcel extends StatefulWidget {
 }
 
 final TextEditingController receiverIdTextField = TextEditingController();
-final TextEditingController receiverRemarksTextField = TextEditingController();
 
 class _CheckOutParcelState extends State<CheckOutParcel> {
   File? file;
@@ -26,6 +24,7 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
 
   final List<Map<String, dynamic>> parcels = [];
   final List<Map<String, dynamic>> cart = [];
+  final Map<String, TextEditingController> remarksControllers = {};
 
   Future<String> uploadImage(File imageFile) async {
     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
@@ -45,6 +44,13 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
     TaskSnapshot snapshot = await uploadTask.whenComplete(() => null);
     String imageUrl = await snapshot.ref.getDownloadURL();
     return imageUrl;
+  }
+
+  Future<void> scanQRCode(TextEditingController controller) async {
+    var result = await BarcodeScanner.scan();
+    setState(() {
+      controller.text = result.rawContent;
+    });
   }
 
   Future<void> getImage() async {
@@ -84,6 +90,7 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
           if (!cart.any((parcel) => parcel['id'] == doc.id)) {
             parcels.add(docData);
             cart.add(docData);
+            remarksControllers[doc.id] = TextEditingController();
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -126,6 +133,40 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
       return;
     }
 
+    final userQuery = await FirebaseFirestore.instance
+        .collection('client_user')
+        .where('unique_id', isEqualTo: receiverIdTextField.text)
+        .get();
+
+    if (userQuery.docs.isNotEmpty) {
+      final userDoc = userQuery.docs.first;
+      int currentPoints = userDoc['membership_points'] ?? 0;
+      int pointsToAdd = cart.length * 2;
+
+      await userDoc.reference.update({
+        'membership_points': currentPoints + pointsToAdd,
+      });
+    }
+
+    // Check if remarks are required for parcels with parcelCategory 2 or 3
+    for (var parcel in cart) {
+      int parcelCategory = parcel['parcelCategory'] ?? 0;
+      String docId = parcel['id'];
+      String receiverRemarks = remarksControllers[docId]?.text ?? '';
+
+      if ((parcelCategory == 2 || parcelCategory == 3) &&
+          receiverRemarks.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content:
+                Text('Remarks are required for COD & Self-Collect parcels!'),
+            duration: Duration(seconds: 7),
+          ),
+        );
+        return; // Stop the checkout process
+      }
+    }
+
     try {
       String imageUrl;
       if (kIsWeb) {
@@ -134,19 +175,19 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
         imageUrl = await uploadImage(file!);
       }
       String receiverId = receiverIdTextField.text;
-      String recerverRemarks = receiverRemarksTextField.text;
       DateTime currentTime = DateTime.now();
 
       for (var parcel in cart) {
         String docId = parcel['id'];
+        String receiverRemarks = remarksControllers[docId]?.text ?? '';
         await FirebaseFirestore.instance
             .collection('parcelInventory')
             .doc(docId)
             .update({
-          'status': 'DELIVERED',
+          'status': 3,
           'receiverImageUrl': imageUrl,
           'receiverId': receiverId,
-          'receiverRemarks': recerverRemarks,
+          'receiverRemarks': receiverRemarks,
           'timestamp_delivered': currentTime,
         });
       }
@@ -163,6 +204,7 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
         file = null;
         webImagePath = null;
         receiverIdTextField.clear();
+        remarksControllers.clear();
       });
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -178,6 +220,7 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
   void removeFromCart(String docId) {
     setState(() {
       cart.removeWhere((parcel) => parcel['id'] == docId);
+      remarksControllers.remove(docId);
     });
   }
 
@@ -190,6 +233,12 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
         TextField(
           controller: trackingIdController,
           decoration: InputDecoration(
+            suffixIcon: IconButton(
+              onPressed: () {
+                scanQRCode(trackingIdController);
+              },
+              icon: const Icon(Icons.barcode_reader),
+            ),
             labelText: 'Tracking ID',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           ),
@@ -210,17 +259,48 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
                   ),
                   ...cart.map((parcel) {
                     String docId = parcel['id'];
+                    int parcelCategory = parcel['parcelCategory'] ?? 0;
+                    String categoryText = '';
+                    if (parcelCategory == 2) {
+                      categoryText = '  [SELF-COLLECT]';
+                    } else if (parcelCategory == 3) {
+                      categoryText = '  [COD]';
+                    }
                     return Card(
                       elevation: 3,
                       child: ListTile(
-                        title: Text(parcel['trackingId1'] ?? ''),
+                        title: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(parcel['trackingId1'] ?? ''),
+                                const SizedBox(width: 8),
+                                Text(
+                                  categoryText,
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: remarksControllers[docId],
+                              decoration: const InputDecoration(
+                                labelText: 'Remarks',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                          ],
+                        ),
                         trailing: IconButton(
                           icon: const Icon(Icons.remove_circle),
                           onPressed: () => removeFromCart(docId),
                         ),
                       ),
                     );
-                    // ignore: unnecessary_to_list_in_spreads
                   }).toList(),
                   const SizedBox(height: 20),
                   Container(
@@ -232,7 +312,6 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
                             const BorderRadius.all(Radius.circular(10))),
                     child: webImagePath == null && file == null
                         ? MaterialButton(
-                            //height: 5,
                             child: Column(
                               children: [
                                 SizedBox(
@@ -255,7 +334,6 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
                             },
                           )
                         : MaterialButton(
-                            //height: 5,
                             child: kIsWeb
                                 ? Image.network(
                                     webImagePath!,
@@ -279,28 +357,18 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
                     controller: receiverIdTextField,
                     style: const TextStyle(fontSize: 12),
                     decoration: InputDecoration(
-                        //suffixIcon: IconButton(
-                        //  onPressed: () {},
-                        //  icon: const Icon(Icons.barcode_reader),
-                        //),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            scanQRCode(receiverIdTextField);
+                          },
+                          icon: const Icon(Icons.barcode_reader),
+                        ),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10)),
-                        labelText: 'Receiver ID*'),
+                        labelText: 'Receiver ID/UID*'),
                   ),
                   const SizedBox(
                     height: 15,
-                  ),
-                  TextField(
-                    controller: receiverRemarksTextField,
-                    style: const TextStyle(fontSize: 12),
-                    decoration: InputDecoration(
-                        //suffixIcon: IconButton(
-                        //  onPressed: () {},
-                        //  icon: const Icon(Icons.barcode_reader),
-                        //),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10)),
-                        labelText: 'Receiver remarks'),
                   ),
                   FilledButton(
                     onPressed: updateData,
@@ -308,7 +376,7 @@ class _CheckOutParcelState extends State<CheckOutParcel> {
                   ),
                 ],
               )
-            : const Text('Checkout cart is empty'),
+            : const Text('Checkout system is empty'),
       ]),
     );
   }

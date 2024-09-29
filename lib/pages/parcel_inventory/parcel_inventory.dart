@@ -12,12 +12,15 @@ class ParcelInventory extends StatefulWidget {
 }
 
 class _ParcelInventoryState extends State<ParcelInventory> {
-  final _firestore = FirebaseFirestore.instance;
+  // final _firestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
-    final collectionStream =
-        _firestore.collection('parcelInventory').snapshots();
+    final Stream<QuerySnapshot> collectionStream = FirebaseFirestore.instance
+        .collection('parcelInventory')
+        .orderBy('timestamp_arrived_sorted',
+            descending: true) // Order by 'ver_date' in descending order
+        .snapshots();
 
     return StreamBuilder<QuerySnapshot>(
       stream: collectionStream,
@@ -106,147 +109,156 @@ class _MyListItemWidgetState extends State<MyListItemWidget> {
 
     final remarks = widget.data['remarks'] ?? 'No remarks';
     final status = widget.data['status'];
+    final parcelCategory = widget.data['parcelCategory'] ?? 1;
 
-    double witdh = MediaQuery.of(context).size.width;
+    double width = MediaQuery.of(context).size.width;
 
     return VisibilityDetector(
-        key: Key(widget.data['trackingId1']),
-        onVisibilityChanged: (visibilityInfo) {
-          if (_mounted) {
-            setState(() {});
-          }
-        },
-        child: Column(children: [
+      key: Key(widget.data['trackingId1']),
+      onVisibilityChanged: (visibilityInfo) {
+        if (_mounted) {
+          setState(() {});
+        }
+      },
+      child: Column(
+        children: [
           Card(
-              elevation: 0,
-              child: Column(
-                children: [
-                  SizedBox(
-                      //width: 400,
-                      child: ClipRRect(
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(10)),
-                          child: Material(
-                            color: Theme.of(context).colorScheme.surfaceVariant,
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => DetailPage(
-                                        data: widget.data, docId: widget.docId),
-                                  ),
-                                );
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                                child: Row(
-                                  children: [
-                                    Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            10, 0, 0, 0),
-                                        child: Container(
-                                          width: witdh < 679
-                                              ? witdh - 40
-                                              : witdh - 360,
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text('Track No 1: $trackingID1'),
-                                              Text('Remarks: $remarks'),
-                                              if (status == 'DELIVERED')
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.fromLTRB(
-                                                          0, 5, 5, 1),
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                        decoration: BoxDecoration(
-                                                            color: const Color
-                                                                .fromARGB(255,
-                                                                13, 196, 0),
-                                                            border:
-                                                                Border.all(),
-                                                            borderRadius:
-                                                                const BorderRadius
-                                                                    .all(
-                                                                    Radius.circular(
-                                                                        10))),
-                                                        child: Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .fromLTRB(
-                                                                    5, 1, 5, 1),
-                                                            child: Text(
-                                                              widget.data[
-                                                                  'status'],
-                                                              style: TextStyle(
-                                                                  color: Theme.of(
-                                                                          context)
-                                                                      .colorScheme
-                                                                      .onPrimary),
-                                                            )),
-                                                      ),
-                                                      const SizedBox(
-                                                        height: 10,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                )
-                                              else
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.fromLTRB(
-                                                          0, 5, 5, 1),
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                        decoration: BoxDecoration(
-                                                            color: const Color
-                                                                .fromARGB(255,
-                                                                167, 196, 0),
-                                                            border:
-                                                                Border.all(),
-                                                            borderRadius:
-                                                                const BorderRadius
-                                                                    .all(
-                                                                    Radius.circular(
-                                                                        10))),
-                                                        child: Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .fromLTRB(
-                                                                    5, 1, 5, 1),
-                                                            child: Text(
-                                                              widget.data[
-                                                                  'status'],
-                                                              style: TextStyle(
-                                                                  color: Theme.of(
-                                                                          context)
-                                                                      .colorScheme
-                                                                      .onPrimary),
-                                                            )),
-                                                      ),
-                                                      const SizedBox(
-                                                        height: 10,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                            ],
-                                          ),
-                                        ))
-                                  ],
-                                ),
-                              ),
+            elevation: 0,
+            child: Column(
+              children: [
+                SizedBox(
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                    child: Material(
+                      color: Theme.of(context).colorScheme.surfaceVariant,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DetailPage(
+                                  data: widget.data, docId: widget.docId),
                             ),
-                          )))
-                ],
-              ))
-        ]));
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                          child: Row(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                child: Container(
+                                  width: width < 679 ? width - 40 : width - 360,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Track No 1: $trackingID1'),
+                                      Text('Remarks: $remarks'),
+                                      Row(
+                                        children: [
+                                          _buildStatusWidget(context, status),
+                                          _buildCategoryWidget(
+                                              context, parcelCategory),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusWidget(BuildContext context, int status) {
+    switch (status) {
+      case 2:
+        return _statusContainer(
+            context, 'On-Delivery', Colors.blue); // On-Delivery in orange
+      case 3:
+        return _statusContainer(
+            context, 'Delivered', Colors.green); // Delivered in green blue
+      default:
+        return _statusContainer(context, 'Arrived-Sorted', Colors.orange);
+    }
+  }
+
+  Widget _statusContainer(
+      BuildContext context, String statusText, Color color) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 5, 5, 1),
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(5, 1, 5, 1),
+              child: Text(
+                statusText,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryWidget(BuildContext context, int parcelCategory) {
+    switch (parcelCategory) {
+      case 2:
+        return _categoryContainer(context, 'SELF-COLLECT');
+      case 3:
+        return _categoryContainer(context, 'COD');
+      default:
+        return Container();
+    }
+  }
+
+  Widget _categoryContainer(BuildContext context, String categoryText) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 5, 5, 1),
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(0, 167, 196, 0),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(5, 1, 5, 1),
+              child: Text(
+                categoryText,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
+      ),
+    );
   }
 }

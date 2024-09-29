@@ -12,6 +12,7 @@ class AnalyticsParcel extends StatefulWidget {
 class AnalyticsParcelState extends State<AnalyticsParcel> {
   int totalParcels = 0;
   int totalParcelsArrived = 0;
+  int totalParcelsOnDelivery = 0;
   int totalParcelsDelivered = 0;
   int totalUserClient = 0;
   int totalUserAdmin = 0;
@@ -24,6 +25,7 @@ class AnalyticsParcelState extends State<AnalyticsParcel> {
     _fetchUserAdmin();
     _fetchTotalParcelsArrived();
     _fetchTotalParcelsDelivered();
+    _fetchTotalParcelsOnDelivery();
   }
 
   Future<void> _fetchTotalParcels() async {
@@ -43,7 +45,7 @@ class AnalyticsParcelState extends State<AnalyticsParcel> {
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('parcelInventory')
-          .where('status', isEqualTo: 'ARRIVED-SORTED')
+          .where('status', isEqualTo: 1)
           .get();
 
       setState(() {
@@ -54,11 +56,26 @@ class AnalyticsParcelState extends State<AnalyticsParcel> {
     }
   }
 
+  Future<void> _fetchTotalParcelsOnDelivery() async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('parcelInventory')
+          .where('status', isEqualTo: 2)
+          .get();
+
+      setState(() {
+        totalParcelsOnDelivery = querySnapshot.docs.length;
+      });
+    } catch (e) {
+      print('Error fetching total arrived parcels: $e');
+    }
+  }
+
   Future<void> _fetchTotalParcelsDelivered() async {
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('parcelInventory')
-          .where('status', isEqualTo: 'DELIVERED')
+          .where('status', isEqualTo: 3)
           .get();
 
       setState(() {
@@ -197,6 +214,53 @@ class AnalyticsParcelState extends State<AnalyticsParcel> {
                           ),
                           Text(
                             "Arrived - Sorted",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+              child: SizedBox(
+                width: 150,
+                height: 100,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: Material(
+                    color: Theme.of(context).colorScheme.surfaceVariant,
+                    child: InkWell(
+                      onTap: () {},
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              width: 50,
+                              height: 50,
+                              child: Text(
+                                "$totalParcelsOnDelivery",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.w900,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Text(
+                            "On delivery",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 13,

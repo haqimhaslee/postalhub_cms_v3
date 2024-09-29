@@ -11,7 +11,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
   cupertino_icons: ^1.0.6
   dynamic_color: ^1.7.0
   animations: ^2.0.8
@@ -21,15 +20,20 @@ dependencies:
   firebase_core: ^2.31.0
   firebase_storage: ^11.6.0
   firebase_database: ^10.5.5
-  flutter_barcode_scanner: ^2.0.0
   firebase_auth: ^4.20.0
   intl: ^0.17.0
   loading_animation_widget: ^1.2.0+4
   visibility_detector: ^0.2.0
   shimmer: ^2.0.0
-  flutter_image_slideshow: ^0.1.6
   file_picker: ^8.0.3
-
+  another_stepper: ^1.2.2
+  image_picker_for_web: ^3.0.5
+  carousel_slider: ^5.0.0
+  cached_network_image: ^3.4.0
+  barcode_scan2: ^4.3.3
+  permission_handler: ^11.3.1
+  image_picker_web: ^4.0.0
+  firebase_messaging: ^14.9.4
 
 dev_dependencies:
   flutter_test:

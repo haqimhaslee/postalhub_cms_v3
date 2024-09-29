@@ -4,10 +4,12 @@ import 'package:animations/animations.dart';
 import 'package:postalhub_admin_cms/pages/check_in_parcel/check_in_parcel.dart';
 import 'package:postalhub_admin_cms/pages/check_out_parcel/check_out_parcel.dart';
 import 'package:postalhub_admin_cms/pages/home/home.dart';
+import 'package:postalhub_admin_cms/pages/loyalty_prog/loyalty_prog.dart';
 import 'package:postalhub_admin_cms/pages/out_for_delivery/out_for_delivery.dart';
 import 'package:postalhub_admin_cms/pages/parcel_inventory/parcel_inventory.dart';
 import 'package:postalhub_admin_cms/pages/profile_settings/profile_settings.dart';
 import 'package:postalhub_admin_cms/pages/search_inventory/search_inventory.dart';
+import 'package:postalhub_admin_cms/pages/search_user/search_user.dart';
 
 class NavigatorServices extends StatefulWidget {
   const NavigatorServices({super.key});
@@ -22,10 +24,12 @@ class _NavigatorServicesState extends State<NavigatorServices> {
     const Home(),
     const ParcelInventory(),
     const SearchInventory(),
+    const SearchUser(),
     const CheckInParcel(),
     const CheckOutParcel(),
     const OutForDelivery(),
-    const MyProfile(),
+    const LoyaltyProg(), //tbc soon
+    const MyProfile()
   ];
   void openDrawer() {
     scaffoldKey.currentState!.openDrawer();
@@ -89,6 +93,11 @@ class _NavigatorServicesState extends State<NavigatorServices> {
               icon: Icon(Icons.search_outlined),
               selectedIcon: Icon(Icons.search_rounded),
             ),
+            const NavigationDrawerDestination(
+              label: Text("Search User"),
+              icon: Icon(Icons.person_search_outlined),
+              selectedIcon: Icon(Icons.person_search_rounded),
+            ),
             const Padding(
               padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
               child: Divider(),
@@ -112,14 +121,19 @@ class _NavigatorServicesState extends State<NavigatorServices> {
               icon: Icon(Icons.delivery_dining_outlined),
               selectedIcon: Icon(Icons.delivery_dining),
             ),
+            const NavigationDrawerDestination(
+              label: Text("Reward Point"),
+              icon: Icon(Icons.card_membership_outlined),
+              selectedIcon: Icon(Icons.card_membership_rounded),
+            ),
             const Padding(
               padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
               child: Divider(),
             ),
             const NavigationDrawerDestination(
-              label: Text("Profile & Setting"),
-              icon: Icon(Icons.manage_accounts_outlined),
-              selectedIcon: Icon(Icons.manage_accounts_rounded),
+              label: Text("CMS & Setting"),
+              icon: Icon(Icons.settings_outlined),
+              selectedIcon: Icon(Icons.settings_rounded),
             ),
             const Padding(
               padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
@@ -164,6 +178,11 @@ class _NavigatorServicesState extends State<NavigatorServices> {
                           icon: Icon(Icons.search_outlined),
                           selectedIcon: Icon(Icons.search_rounded),
                         ),
+                        const NavigationDrawerDestination(
+                          label: Text("Search User"),
+                          icon: Icon(Icons.person_search_outlined),
+                          selectedIcon: Icon(Icons.person_search_rounded),
+                        ),
                         const Padding(
                           padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
                           child: Divider(),
@@ -187,14 +206,19 @@ class _NavigatorServicesState extends State<NavigatorServices> {
                           icon: Icon(Icons.delivery_dining_outlined),
                           selectedIcon: Icon(Icons.delivery_dining),
                         ),
+                        const NavigationDrawerDestination(
+                          label: Text("Reward Point"),
+                          icon: Icon(Icons.card_membership_outlined),
+                          selectedIcon: Icon(Icons.card_membership_rounded),
+                        ),
                         const Padding(
                           padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
                           child: Divider(),
                         ),
                         const NavigationDrawerDestination(
-                          label: Text("Profile & Setting"),
-                          icon: Icon(Icons.manage_accounts_outlined),
-                          selectedIcon: Icon(Icons.manage_accounts_rounded),
+                          label: Text("CMS & Setting"),
+                          icon: Icon(Icons.settings_outlined),
+                          selectedIcon: Icon(Icons.settings_rounded),
                         ),
                         const Padding(
                           padding: EdgeInsets.fromLTRB(28, 16, 28, 10),

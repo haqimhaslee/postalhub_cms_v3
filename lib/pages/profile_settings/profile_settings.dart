@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:postalhub_admin_cms/login_services/auth_page.dart';
 import 'package:postalhub_admin_cms/login_services/login_page.dart';
+import 'package:postalhub_admin_cms/pages/notification_tester/notification_tester.dart';
 
 final FirebaseAuth auth = FirebaseAuth.instance;
 
@@ -143,6 +144,72 @@ class _MyProfileState extends State<MyProfile> {
                                       )),
                                 )),
                           )),
+                      const Padding(
+                          padding: EdgeInsets.only(
+                            top: 10,
+                            bottom: 5,
+                          ),
+                          child: Text(
+                            'DEV TEST',
+                            style: TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.w800),
+                          )),
+                      Padding(
+                          padding: const EdgeInsets.only(
+                            top: 5,
+                            bottom: 15,
+                            left: 15,
+                            right: 15,
+                          ),
+                          child: Card(
+                              elevation: 2,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(15)),
+                              ),
+                              child: Column(children: [
+                                SizedBox.fromSize(
+                                  size: const Size(400, 55),
+                                  child: ClipRRect(
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(15),
+                                      topRight: Radius.circular(15),
+                                      bottomLeft: Radius.circular(15),
+                                      bottomRight: Radius.circular(15),
+                                    ),
+                                    child: Material(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceVariant,
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const notificationTester()));
+                                        },
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            Text(
+                                              "Notification Tester",
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 12,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSecondaryContainer,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ]))),
                       const Padding(
                           padding: EdgeInsets.only(
                             top: 10,
