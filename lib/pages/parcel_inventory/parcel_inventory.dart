@@ -13,17 +13,34 @@ class ParcelInventory extends StatefulWidget {
 
 class _ParcelInventoryState extends State<ParcelInventory> {
   // final _firestore = FirebaseFirestore.instance;
+  DocumentSnapshot? _lastDocument;
+  bool _hasMore = true;
+  final int _limit = 20;
+  late Stream<QuerySnapshot> _collectionStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _collectionStream = _getStream();
+  }
+
+  Stream<QuerySnapshot> _getStream() {
+    Query query = FirebaseFirestore.instance
+        .collection('parcelInventory')
+        .orderBy('timestamp_arrived_sorted', descending: true)
+        .limit(_limit);
+
+    if (_lastDocument != null) {
+      query = query.startAfterDocument(_lastDocument!);
+    }
+
+    return query.snapshots();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final Stream<QuerySnapshot> collectionStream = FirebaseFirestore.instance
-        .collection('parcelInventory')
-        .orderBy('timestamp_arrived_sorted',
-            descending: true) // Order by 'ver_date' in descending order
-        .snapshots();
-
     return StreamBuilder<QuerySnapshot>(
-      stream: collectionStream,
+      stream: _collectionStream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
@@ -35,6 +52,11 @@ class _ParcelInventoryState extends State<ParcelInventory> {
 
         final documents = snapshot.data!.docs;
         final totalParcels = documents.length;
+
+        if (documents.isNotEmpty) {
+          _lastDocument = documents[documents.length - 1];
+          _hasMore = documents.length == _limit;
+        }
 
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -57,20 +79,32 @@ class _ParcelInventoryState extends State<ParcelInventory> {
               ),
             ),
             Expanded(
-              child: ListView.builder(
-                itemCount: documents.length,
-                itemBuilder: (context, index) {
-                  final data = documents[index].data();
-                  if (data is Map<String, dynamic>) {
-                    return MyListItemWidget(
-                        data: data, docId: documents[index].id);
-                  } else {
-                    // Handle unexpected data type (e.g., print a warning)
-                    return const SizedBox(); // Or any placeholder widget
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (ScrollNotification scrollInfo) {
+                  if (scrollInfo.metrics.pixels ==
+                          scrollInfo.metrics.maxScrollExtent &&
+                      _hasMore) {
+                    setState(() {
+                      _collectionStream = _getStream();
+                    });
                   }
+                  return true;
                 },
+                child: ListView.builder(
+                  itemCount: documents.length,
+                  itemBuilder: (context, index) {
+                    final data = documents[index].data();
+                    if (data is Map<String, dynamic>) {
+                      return MyListItemWidget(
+                          data: data, docId: documents[index].id);
+                    } else {
+                      // Handle unexpected data type (e.g., print a warning)
+                      return const SizedBox(); // Or any placeholder widget
+                    }
+                  },
+                ),
               ),
-            ),
+            )
           ],
         );
       },

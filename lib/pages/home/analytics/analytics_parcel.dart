@@ -20,95 +20,37 @@ class AnalyticsParcelState extends State<AnalyticsParcel> {
   @override
   void initState() {
     super.initState();
-    _fetchTotalParcels();
-    _fetchUserClient();
-    _fetchUserAdmin();
-    _fetchTotalParcelsArrived();
-    _fetchTotalParcelsDelivered();
-    _fetchTotalParcelsOnDelivery();
+    _fetchData();
   }
 
-  Future<void> _fetchTotalParcels() async {
+  Future<void> _fetchData() async {
     try {
-      QuerySnapshot querySnapshot =
+      // Fetch each collection separately
+      final parcelInventorySnapshot =
           await FirebaseFirestore.instance.collection('parcelInventory').get();
-      setState(() {
-        totalParcels = querySnapshot.size;
-      });
-    } catch (e) {
-      // Handle any errors here
-      print("Error fetching total parcels: $e");
-    }
-  }
-
-  Future<void> _fetchTotalParcelsArrived() async {
-    try {
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection('parcelInventory')
-          .where('status', isEqualTo: 1)
-          .get();
-
-      setState(() {
-        totalParcelsArrived = querySnapshot.docs.length;
-      });
-    } catch (e) {
-      print('Error fetching total arrived parcels: $e');
-    }
-  }
-
-  Future<void> _fetchTotalParcelsOnDelivery() async {
-    try {
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection('parcelInventory')
-          .where('status', isEqualTo: 2)
-          .get();
-
-      setState(() {
-        totalParcelsOnDelivery = querySnapshot.docs.length;
-      });
-    } catch (e) {
-      print('Error fetching total arrived parcels: $e');
-    }
-  }
-
-  Future<void> _fetchTotalParcelsDelivered() async {
-    try {
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection('parcelInventory')
-          .where('status', isEqualTo: 3)
-          .get();
-
-      setState(() {
-        totalParcelsDelivered = querySnapshot.docs.length;
-      });
-    } catch (e) {
-      print('Error fetching total arrived parcels: $e');
-    }
-  }
-
-  Future<void> _fetchUserClient() async {
-    try {
-      QuerySnapshot querySnapshot =
+      final clientUserSnapshot =
           await FirebaseFirestore.instance.collection('client_user').get();
-      setState(() {
-        totalUserClient = querySnapshot.size;
-      });
-    } catch (e) {
-      // Handle any errors here
-      print("Error fetching total parcels: $e");
-    }
-  }
-
-  Future<void> _fetchUserAdmin() async {
-    try {
-      QuerySnapshot querySnapshot =
+      final adminUserSnapshot =
           await FirebaseFirestore.instance.collection('admin_user').get();
+
       setState(() {
-        totalUserAdmin = querySnapshot.size;
+        totalParcels = parcelInventorySnapshot.size;
+        totalUserClient = clientUserSnapshot.size;
+        totalUserAdmin = adminUserSnapshot.size;
+
+        // Accessing 'status' as an integer
+        totalParcelsArrived = parcelInventorySnapshot.docs
+            .where((doc) => doc.data()['status'] == 1)
+            .length;
+        totalParcelsOnDelivery = parcelInventorySnapshot.docs
+            .where((doc) => doc.data()['status'] == 2)
+            .length;
+        totalParcelsDelivered = parcelInventorySnapshot.docs
+            .where((doc) => doc.data()['status'] == 3)
+            .length;
       });
     } catch (e) {
-      // Handle any errors here
-      print("Error fetching total parcels: $e");
+      print("Error fetching data: $e");
     }
   }
 
@@ -116,9 +58,7 @@ class AnalyticsParcelState extends State<AnalyticsParcel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SizedBox(
-          height: 20,
-        ),
+        const SizedBox(height: 20),
         Text(
           "Analytics",
           textAlign: TextAlign.center,
@@ -128,297 +68,64 @@ class AnalyticsParcelState extends State<AnalyticsParcel> {
             color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
-        SizedBox(
-          height: 20,
-        ),
+        const SizedBox(height: 20),
         Wrap(
           alignment: WrapAlignment.center,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-              child: SizedBox(
-                width: 150,
-                height: 100,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: Material(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
-                    child: InkWell(
-                      onTap: () {},
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Container(
-                              width: 50,
-                              height: 50,
-                              child: Text(
-                                "$totalParcels",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.w900,
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Text(
-                            "Total parcel (Inventory)",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-              child: SizedBox(
-                width: 150,
-                height: 100,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: Material(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
-                    child: InkWell(
-                      onTap: () {},
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Container(
-                              width: 50,
-                              height: 50,
-                              child: Text(
-                                "$totalParcelsArrived",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.w900,
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Text(
-                            "Arrived - Sorted",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-              child: SizedBox(
-                width: 150,
-                height: 100,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: Material(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
-                    child: InkWell(
-                      onTap: () {},
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Container(
-                              width: 50,
-                              height: 50,
-                              child: Text(
-                                "$totalParcelsOnDelivery",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.w900,
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Text(
-                            "On delivery",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-              child: SizedBox(
-                width: 150,
-                height: 100,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: Material(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
-                    child: InkWell(
-                      onTap: () {},
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Container(
-                              width: 50,
-                              height: 50,
-                              child: Text(
-                                "$totalParcelsDelivered",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.w900,
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Text(
-                            "Delivered",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-              child: SizedBox(
-                width: 150,
-                height: 100,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: Material(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
-                    child: InkWell(
-                      onTap: () {},
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Container(
-                              width: 50,
-                              height: 50,
-                              child: Text(
-                                "$totalUserClient",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.w900,
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Text(
-                            "User (Client)",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-              child: SizedBox(
-                width: 150,
-                height: 100,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: Material(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
-                    child: InkWell(
-                      onTap: () {},
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Container(
-                              width: 50,
-                              height: 50,
-                              child: Text(
-                                "$totalUserAdmin",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.w900,
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Text(
-                            "User (Admin)",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            _buildAnalyticsCard(
+                context, totalParcels, "Total parcel (Inventory)"),
+            _buildAnalyticsCard(
+                context, totalParcelsArrived, "Arrived - Sorted"),
+            _buildAnalyticsCard(context, totalParcelsOnDelivery, "On delivery"),
+            _buildAnalyticsCard(context, totalParcelsDelivered, "Delivered"),
+            _buildAnalyticsCard(context, totalUserClient, "User (Client)"),
+            _buildAnalyticsCard(context, totalUserAdmin, "User (Admin)"),
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildAnalyticsCard(BuildContext context, int value, String label) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+      child: SizedBox(
+        width: 150,
+        height: 100,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(15),
+          child: Material(
+            color: Theme.of(context).colorScheme.surfaceVariant,
+            child: InkWell(
+              onTap: () {},
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  // Removed fixed width constraint
+                  Text(
+                    "$value",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w900,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
