@@ -12,19 +12,37 @@ class ParcelInventory extends StatefulWidget {
 }
 
 class _ParcelInventoryState extends State<ParcelInventory> {
-  // final _firestore = FirebaseFirestore.instance;
   DocumentSnapshot? _lastDocument;
   bool _hasMore = true;
-  final int _limit = 20;
-  late Stream<QuerySnapshot> _collectionStream;
+  final int _limit = 15;
+  List<DocumentSnapshot> _documents = [];
+  late ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
-    _collectionStream = _getStream();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+    _fetchMoreData();
   }
 
-  Stream<QuerySnapshot> _getStream() {
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent &&
+        _hasMore) {
+      _fetchMoreData();
+    }
+  }
+
+  Future<void> _fetchMoreData() async {
+    if (!_hasMore) return;
+
     Query query = FirebaseFirestore.instance
         .collection('parcelInventory')
         .orderBy('timestamp_arrived_sorted', descending: true)
@@ -34,83 +52,46 @@ class _ParcelInventoryState extends State<ParcelInventory> {
       query = query.startAfterDocument(_lastDocument!);
     }
 
-    return query.snapshots();
+    try {
+      final snapshot = await query.get();
+      setState(() {
+        _documents.addAll(snapshot.docs);
+        _lastDocument = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
+        _hasMore = snapshot.docs.length == _limit;
+      });
+    } catch (e) {
+      print('Error fetching data: $e');
+      // Handle error (e.g., show a snackbar)
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: _collectionStream,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        }
-
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        final documents = snapshot.data!.docs;
-        final totalParcels = documents.length;
-
-        if (documents.isNotEmpty) {
-          _lastDocument = documents[documents.length - 1];
-          _hasMore = documents.length == _limit;
-        }
-
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 10, 5, 5),
-              child: Container(
-                decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    border: Border.all(color: const Color.fromARGB(0, 0, 0, 0)),
-                    borderRadius: const BorderRadius.all(Radius.circular(10))),
-                child: Padding(
-                    padding: const EdgeInsets.fromLTRB(5, 1, 5, 1),
-                    child: Text(
-                      'Total Parcels: $totalParcels',
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary),
-                    )),
-              ),
-            ),
-            Expanded(
-              child: NotificationListener<ScrollNotification>(
-                onNotification: (ScrollNotification scrollInfo) {
-                  if (scrollInfo.metrics.pixels ==
-                          scrollInfo.metrics.maxScrollExtent &&
-                      _hasMore) {
-                    setState(() {
-                      _collectionStream = _getStream();
-                    });
-                  }
-                  return true;
-                },
-                child: ListView.builder(
-                  itemCount: documents.length,
-                  itemBuilder: (context, index) {
-                    final data = documents[index].data();
-                    if (data is Map<String, dynamic>) {
-                      return MyListItemWidget(
-                          data: data, docId: documents[index].id);
-                    } else {
-                      // Handle unexpected data type (e.g., print a warning)
-                      return const SizedBox(); // Or any placeholder widget
-                    }
-                  },
-                ),
-              ),
-            )
-          ],
-        );
-      },
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: ListView.builder(
+            controller: _scrollController,
+            itemCount: _documents.length,
+            itemBuilder: (context, index) {
+              final data = _documents[index].data();
+              if (data is Map<String, dynamic>) {
+                return MyListItemWidget(
+                    data: data, docId: _documents[index].id);
+              } else {
+                return const SizedBox();
+              }
+            },
+          ),
+        )
+      ],
     );
   }
 }
+
+// ... (MyListItemWidget remains unchanged)
 
 class MyListItemWidget extends StatefulWidget {
   final Map<String, dynamic> data;
